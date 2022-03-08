@@ -10,31 +10,30 @@ from typing import List
 #4. compute velocity of every particals according to the total force of every particals
 #5. continue step 1 
 
-__c = 200
-__initDensity : float = 100
-__viscosity : float = 100
-__gravityY : float = -9.8
+_c = 200
+_initDensity : float = 1000.0
+_viscosity : float = 1.0 # 0.001
+_gravityY : float = -9.8
 
 
 
 class Partical(object):
-  posX = 0
-  posY = 0
-  velX = 0
-  velY = 0
-  accX = 0
-  accY = 0
-  mass = 100
-  density = __initDensity
+  posX = 0.0
+  posY = 0.0
+  velX = 0.0
+  velY = 0.0
+  mass = 100.0
+  density = _initDensity
+
+  pressure = 0.0
+  tauXX, tauXY, tauYY, tauYX = 0.0, 0.0, 0.0, 0.0
 
 
-  pressure = 0
-  tauXX, tauXY, tauYY, tauYX = 0
 
-
-  def __init__(self, x, y):
+  def __init__(self, x, y, mass):
     self.posX = x
     self.posY = y
+    self.mass = mass
 
 
 
@@ -52,7 +51,7 @@ class Partical(object):
 
   def computePressrue(self):
     B = 32
-    self.pressure = B * ((self.density / __initDensity) ** 7 - 1)
+    self.pressure = B * ((self.density / _initDensity) ** 7 - 1)
     #self.pressure = self.density * __c **2
 
 
@@ -62,12 +61,12 @@ class Partical(object):
     for point in neigborList:
       dwdx, dwdy = kenelFcunction.kenelDerivative(self, point)
       dvdx += point.mass / point.density * point.velX * dwdx
-      dvdy += point.mass / point.density * point.vely * dwdy
+      dvdy += point.mass / point.density * point.velY * dwdy
 
-    self.tauXX = __viscosity * (2 * dvdx - 2/3 * (dvdx + dvdy))
-    self.tauYY = __viscosity * (2 * dvdy - 2/3 * (dvdx + dvdy))
-    self.tauXY = __viscosity * (dvdx + dvdy)
-    self.tauYX = __viscosity * (dvdx + dvdy)
+    self.tauXX = _viscosity * (2 * dvdx - 2/3 * (dvdx + dvdy))
+    self.tauYY = _viscosity * (2 * dvdy - 2/3 * (dvdx + dvdy))
+    self.tauXY = _viscosity * (dvdx + dvdy)
+    self.tauYX = _viscosity * (dvdx + dvdy)
 
 
 
@@ -118,10 +117,10 @@ class Partical(object):
       d2wdx2, d2wdy2, d2wdxdy = kenelFcunction.kenelDerivative2Order(self, point)
 
       #inclue the normal stress and the shear stress
-      vfX = __viscosity * point.mass / point.density \
+      vfX = _viscosity * point.mass / point.density \
         * (point.velX * d2wdxdy + point.velY * d2wdy2 \
         + 4/3 * point.velX * d2wdx2 - 2/3 * point.velY * d2wdxdy)
-      vfY = __viscosity * point.mass / point.density \
+      vfY = _viscosity * point.mass / point.density \
         * (point.velY * d2wdxdy + point.velX * d2wdx2 \
         + 4/3 * point.velY * d2wdy2 - 2/3 * point.velX * d2wdxdy)
       gradientX += vfX
