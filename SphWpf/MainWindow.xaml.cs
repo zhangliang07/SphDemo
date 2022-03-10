@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 
@@ -23,7 +15,7 @@ namespace SphWpf {
   public partial class MainWindow : Window {
     double pointSize = 5;
     BackgroundWorker backgroundWorker;
-    MainLoop mainLoop = null;
+    Field mainLoop = null;
     int step = 0;
     bool pause = false;
 
@@ -35,6 +27,12 @@ namespace SphWpf {
     Ellipse[] ellipses;
     Rectangle boundary;
 
+    Mutex drawMutex = new Mutex();
+    int lastDrawTime = Environment.TickCount;
+    Mutex writeMutex = new Mutex();
+    int lastWriteTime = Environment.TickCount;
+    string bufferText;
+
 
     public MainWindow() {
       InitializeComponent();
@@ -43,22 +41,34 @@ namespace SphWpf {
       backgroundWorker.WorkerSupportsCancellation = true;
       backgroundWorker.DoWork += DoWork;
       backgroundWorker.ProgressChanged += ProgressChanged;
+      backgroundWorker.RunWorkerCompleted += RunWorkerCompleted;
 
+      Loaded += MainWindow_Loaded;
+    }
+
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
       intiParticals();
     }
 
 
     void intiParticals() {
       step = 1;
-      mainLoop = new MainLoop();
+      mainLoop = new Field();
       mainLoop.putParticals();
 
       map.Children.Clear();
       map.Background = Brushes.LightGreen;
+
+
+
       boundary = new Rectangle();
       boundary.Stroke = Brushes.Red;
       boundary.StrokeThickness = 3;
       map.Children.Add(boundary);
+      Canvas.SetLeft(boundary, 50);
+      Canvas.SetBottom(boundary, 50);
+
       pointList = new PointDD[mainLoop.pointCountX * mainLoop.pointCountY];
       ellipses = new Ellipse[mainLoop.pointCountX * mainLoop.pointCountY];
       for (int i = 0; i < ellipses.Length; ++i) {
@@ -77,14 +87,17 @@ namespace SphWpf {
         pointList[j].Y = particalList[j].posY;
       }
       drawParticals();
-      listBox.Items.Add("set particals");
+      textBox.Text =  "set particals\n";
     }
 
 
     private void button_Click(object sender, RoutedEventArgs e) {
       button.IsEnabled = false;
+      button1.IsEnabled = true;
       button2.IsEnabled = false;
       pause = false;
+
+      intiParticals();
 
       backgroundWorker.RunWorkerAsync();
     }
@@ -92,46 +105,78 @@ namespace SphWpf {
 
 
     void DoWork(object sender, DoWorkEventArgs e) {
-      for (; step < 1000; ++step) {
-        var time_start = DateTimeOffset.Now;
+      for (; step < 10000; ++step) {
         string info = mainLoop.oneSetp();
-        info = string.Format("step {0:d}, cost time: {1:g}, ",
-          step, (DateTimeOffset.Now - time_start).TotalSeconds) + info;
 
-        var particalList = mainLoop.particalList;
-        if (step % 1 == 0) {
+        int time = Environment.TickCount - lastDrawTime;
+        lastDrawTime = Environment.TickCount;
+        if (time < 20) {
+          Thread.Sleep(20 - time);
+        }
+
+        if (drawMutex.WaitOne(0)) {
+          info = string.Format("\nstep {0:d}, cost time: {1:g}, ",
+            step, 0.001 * time) + info;
+          var particalList = mainLoop.particalList;
           for (int j = 0; j < particalList.Count; ++j) {
             pointList[j].X = particalList[j].posX;
             pointList[j].Y = particalList[j].posY;
           }
+          drawMutex.ReleaseMutex();
           backgroundWorker.ReportProgress(step, info);
         }
 
-        if (backgroundWorker.CancellationPending) break;
+        if (backgroundWorker.CancellationPending) {
+          e.Cancel = true;
+          break;
+        }
       }
     }
 
 
     void ProgressChanged(object sender, ProgressChangedEventArgs e) {
-      listBox.Items.Add((string)e.UserState);
-      listBox.ScrollIntoView(listBox.Items[listBox.Items.Count -1]);
+      if (drawMutex.WaitOne(0)) {
+        drawParticals();
+        drawMutex.ReleaseMutex();
+      }
 
-      drawParticals();
+      if (Environment.TickCount - lastWriteTime > 500) {
+        lastWriteTime = Environment.TickCount;
+        writeMutex.WaitOne();
+        textBox.AppendText(bufferText);
+        bufferText = "";
+        writeMutex.ReleaseMutex();
+        textBox.ScrollToEnd();
+      } else {
+        writeMutex.WaitOne();
+        bufferText += (string)e.UserState;
+        writeMutex.ReleaseMutex();
+      }
+    }
+
+
+    private void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+      button.IsEnabled = true;
+      button2.IsEnabled = true;
+
+      if(!e.Cancelled) button1.IsEnabled = false;
     }
 
 
     void drawParticals() {
+      textBlock.Text = String.Format("real time: {0:g8} s", mainLoop.realTime);
+
       double height = mainLoop._upBound - mainLoop._lowBound;
       double weight = mainLoop._rightBound - mainLoop._leftBound;
-      double windowH = map.ActualHeight;
-      double windowW = map.ActualWidth;
+      double windowH = map.ActualHeight - 100;
+      double windowW = map.ActualWidth - 100;
 
       boundary.Width = windowW;
       boundary.Height = windowH;
       //map.Children.Clear();
       for (int i = 0; i < pointList.Length; ++i) {
-        Canvas.SetLeft(ellipses[i], pointList[i].X * windowW / weight);
-        Canvas.SetBottom(ellipses[i], pointList[i].Y * windowH / height);
+        Canvas.SetLeft(ellipses[i], pointList[i].X * windowW / weight + 50);
+        Canvas.SetBottom(ellipses[i], pointList[i].Y * windowH / height + 50);
       }
     }
 
@@ -154,7 +199,7 @@ namespace SphWpf {
 
 
     private void button2_Click(object sender, RoutedEventArgs e) {
-      Parameters parameters = new Parameters();
+      ParametersDialog parameters = new ParametersDialog();
       parameters.ShowDialog();
     }
   }

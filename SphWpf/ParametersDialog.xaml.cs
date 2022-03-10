@@ -14,10 +14,10 @@ using System.Windows.Shapes;
 
 namespace SphWpf {
   /// <summary>
-  /// Interaction logic for Parameters.xaml
+  /// Interaction logic for ParametersDialog.xaml
   /// </summary>
-  public partial class Parameters : Window {
-    public Parameters() {
+  public partial class ParametersDialog : Window {
+    public ParametersDialog() {
       InitializeComponent();
     }
   }

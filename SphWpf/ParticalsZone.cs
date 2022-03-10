@@ -10,11 +10,11 @@ namespace SphWpf {
   internal class ParticalsZone {
     List<Partical>[,] zones;
 
-    readonly double _lowBound = 0;
-    readonly double _upBound = 2.0;
-    readonly double _leftBound = 0;
-    readonly double _rightBound = 2.0;
-    readonly double _h = 0;
+    readonly double _lowBound;
+    readonly double _upBound;
+    readonly double _leftBound;
+    readonly double _rightBound;
+    readonly double _h;
 
     readonly int xiMax = 0;
     readonly int yiMax = 0;
@@ -46,6 +46,10 @@ namespace SphWpf {
       foreach (var point in particalList) {
         int xi = (int)((point.posX - _leftBound) / _h);
         int yi = (int)((point.posY - _lowBound) / _h);
+        if (xi <0) xi = 0;
+        if (xi >= xiMax) xi = xiMax - 1;
+        if (yi < 0) yi = 0;
+        if (yi >= yiMax) yi = yiMax - 1;
         zones[xi, yi].Add(point);
       }
     }

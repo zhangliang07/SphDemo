@@ -1,19 +1,12 @@
-﻿<Window x:Class="SphWpf.Parameters"
+﻿<Window x:Class="SphWpf.ParametersDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SphWpf"
         mc:Ignorable="d"
-        Title="Parameters" Height="440" Width="410">
+        Title="ParametersDialog" Height="510" Width="440">
   <Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition/>
-      <ColumnDefinition/>
-      <ColumnDefinition/>
-      <ColumnDefinition/>
-    </Grid.ColumnDefinitions>
-    <TextBlock x:Name="textBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top"/>
 
   </Grid>
 </Window>

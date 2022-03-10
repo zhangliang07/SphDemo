@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace SphWpf {
   internal static class KenelFunction {
-    public static double _h = 0.05f;
-    static double _ad = 15.0f / (7 * Math.PI * _h * _h);
+    public static double _h = 0.05d;
+    static double _ad = 15.0d / (7 * Math.PI * _h * _h);
 
 
     public static double kenel(in Partical self, in Partical other) {
@@ -17,38 +17,38 @@ namespace SphWpf {
       double ydiff = self.posY - other.posY;
       double dis = Math.Sqrt(xdiff * xdiff + ydiff * ydiff) / _h;
 
-      double w = 0.0f;
-      if (dis < 1.0f)
-        w = _ad * (2 / 3 - dis * dis + 0.5 * dis * dis * dis);
-      else if (dis < 2.0f)
-        w = _ad * 1 / 6 * Math.Pow((2 - dis), 3);
+      double w = 0.0d;
+      if (dis < 1.0d)
+        w = _ad * (2d / 3d - dis * dis + 0.5 * dis * dis * dis);
+      else if (dis < 2.0d)
+        w = _ad * 1 / 6 * Math.Pow((2d - dis), 3);
       return w;
     }
 
 
-    public static Tuple<double, double> kenelDerivative(in Partical self, in Partical other) {
+    public static void kenelDerivative(in Partical self, in Partical other,
+      out double dwdx, out double dwdy) {
       double xdiff = self.posX - other.posX;
       double ydiff = self.posY - other.posY;
       double rh = Math.Sqrt(xdiff * xdiff + ydiff * ydiff);
       double dis = rh / _h;
 
-      if (rh == 0.0)
-        return new Tuple<double, double>(0, 0);
+      if (rh < 1e-7 || dis > 2d) {
+        dwdx = 0;
+        dwdy = 0;
+        return;
+      }
 
-      if (dis > 2)
-        return new Tuple<double, double>(0, 0);
-
-      double drdx = 2 * (self.posX - other.posX) / (_h * rh);  //partial derivative of r by x
-      double drdy = 2 * (self.posY - other.posY) / (_h * rh);  //partial derivative of r by y
+      double drdx = 2 * xdiff / (_h * rh);  //partial derivative of r by x
+      double drdy = 2 * ydiff / (_h * rh);  //partial derivative of r by y
       double dwdr = 0.0;
-      if (dis < 1)
-        dwdr = _ad * (3 / 2 * dis * dis - 2 * dis);   //partial derivative of w by r
-      else if (dis < 2)
-        dwdr = -_ad * 1 / 2 * (2 - dis) * (2 - dis);
+      if (dis < 1.0)
+        dwdr = _ad * (1.5d * dis * dis - 2d * dis);   //partial derivative of w by r
+      else if (dis < 2.0)
+        dwdr = -_ad * 0.5d * (2d - dis) * (2d - dis);
 
-      double dwdx = dwdr * drdx;
-      double dwdy = dwdr * drdy;
-      return new Tuple<double, double>(dwdx, dwdy);
+      dwdx = dwdr * drdx;
+      dwdy = dwdr * drdy;
     }
   }
 }

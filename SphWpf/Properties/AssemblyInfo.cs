@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("SphWpf")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Zhang L")]
 [assembly: AssemblyProduct("SphWpf")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]

@@ -1,0 +1,249 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+
+namespace SphWpf {
+  internal class Field {
+    public readonly bool _useAverageDensity = false;
+    public readonly double _stepTimeCoffient = 0.1;
+
+    public readonly double _gravityY = -9.8;
+
+    public readonly int pointCountX = 60;
+    public readonly int pointCountY = 60;
+    public readonly double pointLocationX = 0.01;
+    public readonly double pointLocationY = 0.01;
+
+    public readonly double _lowBound = 0;
+    public readonly double _upBound = 2.0;
+    public readonly double _leftBound = 0;
+    public readonly double _rightBound = 2.0;
+
+    public double realTime = 0;
+    double _deltaTime = 0.001;
+
+    ParticalsZone particalsZone;
+    public List<Partical> particalList = new List<Partical>();
+
+    int threadCount = 6;
+    List<List<Partical>> particalThreadList = new List<List<Partical>>();
+
+    public Field() {
+      particalsZone = new ParticalsZone(_leftBound, _lowBound, _rightBound, _upBound,
+        2 * KenelFunction._h);
+    }
+
+
+    public Field(int threadCount,
+      double leftBound, double lowBound,
+      double rightBound, double upBound, double h,
+      double gravityY, double pointSize, int pointCountX, int pointCountY,
+      double initDensity, double mass, double pressure, 
+      double c, double viscosity,
+      double deltaTime, bool adjectiveDeltaTime = true) {
+      this.threadCount = threadCount;
+      particalsZone = new ParticalsZone(leftBound, lowBound, rightBound, upBound, h);
+    }
+
+
+    public void putParticals() {
+      realTime = 0;
+      particalList.Clear();
+
+      int id = 1;
+      for (int i = 0; i < pointCountX; ++i) {
+        for (int j = 0; j < pointCountY; ++j) {
+          particalList.Add(new Partical(id, i * 0.01 + pointLocationX,
+            j  * 0.01 + pointLocationY, 0.001));
+          ++id;
+        }
+      }
+
+      particalThreadList.Clear();
+      int count = (int)(particalList.Count / threadCount) + 1;
+      for (int i = 0; i < threadCount; ++i) {
+        int c = count;
+        if (i * count + count > particalList.Count) c = particalList.Count - i * count;
+        particalThreadList.Add(particalList.GetRange(i * count, c));
+      }
+
+      particalsZone.SortAllParticals(particalList);
+    }
+
+
+
+
+    void computeDensity(object input) {
+      List<Partical> pointList = input as List<Partical>;
+
+      if (!_useAverageDensity) {
+        foreach (var point in pointList) {
+          var neighborList = particalsZone.GetNeigbors(point);
+          double dpdt = point.computeDensity(neighborList);
+          point.density += dpdt * _deltaTime;
+        }
+      } else {
+        foreach (var point in pointList) {
+          var neighborList = particalsZone.GetNeigbors(point);
+          point.density = point.computeDensityAbsolute(neighborList);
+        }
+      }
+    }
+
+
+    void computePressrueAndViscous(object input) {
+      List<Partical> pointList = input as List<Partical>;
+      foreach (var point in pointList) {
+        var neighborList = particalsZone.GetNeigbors(point);
+        point.computePressrue();
+        point.computeViscous(neighborList);
+      }
+    }
+
+
+    struct MaxVelInfo {
+      public double maxVelX;
+      public double maxVelY;
+      public double maxAccX;
+      public double maxAccY;
+    }
+
+
+    MaxVelInfo computeVelocity(object input) {
+      List<Partical> pointList = input as List<Partical>;
+
+      double maxVelXAbs = 0;
+      double maxVelYAbs = 0;
+      double maxVelX = 0;
+      double maxVelY = 0;
+      double maxAccXAbs = 0;
+      double maxAccYAbs = 0;
+      double maxAccX = 0;
+      double maxAccY = 0;
+      foreach (var point in pointList) {
+        var neighborList = particalsZone.GetNeigbors(point);
+        point.computeVelocity(neighborList, out double dvxdt, out double dvydt);
+        dvydt += _gravityY;
+
+        point.velX = point.velX + dvxdt * _deltaTime;
+        point.velY = point.velY + dvydt * _deltaTime;
+        point.posX = point.posX + (point.velX + 0.5 * dvxdt * _deltaTime) * _deltaTime;
+        point.posY = point.posY + (point.velY + 0.5 * dvydt * _deltaTime) * _deltaTime;
+
+        checkBoundary(ref point.velX, ref point.velY, ref point.posX, ref point.posY);
+
+        if (maxVelXAbs < Math.Abs(point.velX)) {
+          maxVelXAbs = Math.Abs(point.velX);
+          maxVelX = point.velX;
+        }
+        if (maxVelYAbs < Math.Abs(point.velY)) {
+          maxVelYAbs = Math.Abs(point.velY);
+          maxVelY = point.velY;
+        }
+        if (maxAccXAbs < Math.Abs(dvxdt)) {
+          maxAccXAbs = Math.Abs(dvxdt);
+          maxAccX = dvxdt;
+        }
+        if (maxAccYAbs < Math.Abs(dvydt)) {
+          maxAccYAbs = Math.Abs(dvydt);
+          maxAccY = dvydt;
+        }
+      }
+
+      return new MaxVelInfo {
+        maxVelX = maxVelX, maxVelY = maxVelY, maxAccX = maxAccX, maxAccY = maxAccY
+      };
+    }
+
+
+
+    bool checkBoundary(ref double velX, ref double velY, ref double posX, ref double posY) {
+      bool result = false;
+
+      //check boundary
+      double co = 1e5;
+      if (posX < _leftBound) {
+        //newPosX = _leftBound;
+        //if (newVelX < 0) newVelX = -newVelX;
+        double newVelX2 = velX + co * (_leftBound - posX) * _deltaTime;
+        posX += (velX + newVelX2) / 2 * _deltaTime;
+        velX = newVelX2;
+        result = true;
+      } else if (posX > _rightBound) {
+        //newPosX = _rightBound;
+        //if (newVelX > 0) newVelX = -newVelX;
+        double newVelX2 = velX + co * (_rightBound - posX) * _deltaTime;
+        posX += (velX + newVelX2) / 2 * _deltaTime;
+        velX = newVelX2;
+        result = true;
+      }
+
+      if (posY < _lowBound) {
+        //newPosY = _lowBound;
+        //if (newVelY < 0) newVelY = -newVelY;
+        double newVelY2 = velY + co * (_lowBound - posY) * _deltaTime;
+        posY += (velY + newVelY2) / 2 * _deltaTime;
+        velY = newVelY2;
+        result = true;
+      } else if (posY > _upBound) {
+        //newPosY = _upBound;
+        //if (newVelY > 0) newVelY = -newVelY;
+        double newVelY2 = velY + co * (_upBound - posY) * _deltaTime;
+        posY += (velY + newVelY2) / 2 * _deltaTime;
+        velY = newVelY2;
+        result = true;
+      }
+
+      return result;
+    }
+
+
+
+
+    public string oneSetp() {
+      Task[] taskList = new Task[particalThreadList.Count];
+      //2. compute density and pressrue of every particals
+      var action = new Action<object>(computeDensity);
+      for (int i = 0; i < particalThreadList.Count; ++i) {
+        taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
+      }
+      Task.WaitAll(taskList);
+
+      //3. compute pressrue and Viscous coefficient of every particals
+      action = new Action<object>(computePressrueAndViscous);
+      for (int i = 0; i < particalThreadList.Count; ++i) {
+        taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
+      }
+      Task.WaitAll(taskList);
+
+      //4. compute velocity of every particals
+      Task<MaxVelInfo>[] taskList2 = new Task<MaxVelInfo>[particalThreadList.Count];
+      var fun = new Func<object, MaxVelInfo>(computeVelocity);
+      for (int i = 0; i < particalThreadList.Count; ++i) {
+        taskList2[i] = Task.Factory.StartNew((Func<object, MaxVelInfo>)fun, particalThreadList[i]);
+      }
+      Task.WaitAll(taskList2);
+
+      MaxVelInfo maxVelInfo = new MaxVelInfo{maxVelX = 0, maxVelY = 0, maxAccX = 0, maxAccY = 0};
+      for (int i = 0; i < particalThreadList.Count; ++i) {
+        var info = taskList2[i].Result;
+        if (Math.Abs(info.maxVelX) > Math.Abs(maxVelInfo.maxVelX)) maxVelInfo.maxVelX = info.maxVelX;
+        if (Math.Abs(info.maxVelY) > Math.Abs(maxVelInfo.maxVelY)) maxVelInfo.maxVelY = info.maxVelY;
+        if (Math.Abs(info.maxAccX) > Math.Abs(maxVelInfo.maxAccX)) maxVelInfo.maxAccX = info.maxAccX;
+        if (Math.Abs(info.maxAccY) > Math.Abs(maxVelInfo.maxAccY)) maxVelInfo.maxAccY = info.maxAccY;
+      }
+
+      particalsZone.SortAllParticals(particalList);
+
+      //double maxAcc = Math.Sqrt(maxVelInfo.maxAccX * maxVelInfo.maxAccX
+      //  + maxVelInfo.maxAccY * maxVelInfo.maxAccY);
+      //if (maxAcc != 0) _deltaTime = _stepTimeCoffient * Math.Sqrt(KenelFunction._h / maxAcc);
+      //if (_deltaTime > 0.05) _deltaTime = 0.05;
+      realTime += _deltaTime;
+
+      return string.Format("deltaTime = {0:g}, maxVelX = {1:g}, maxVelY = {2:g}, maxAccX = {3:g}, maxAccY = {4:g}",
+        _deltaTime, maxVelInfo.maxVelX, maxVelInfo.maxVelY, maxVelInfo.maxAccX, maxVelInfo.maxAccY);
+    }
+  }
+}
