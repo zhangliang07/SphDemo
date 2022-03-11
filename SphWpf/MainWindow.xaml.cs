@@ -13,9 +13,10 @@ namespace SphWpf {
   /// Interaction logic for MainWindow.xaml
   /// </summary>
   public partial class MainWindow : Window {
-    double pointSize = 5;
+    public static double _pointSize = 5;
+
     BackgroundWorker backgroundWorker;
-    Field mainLoop = null;
+    Field mainLoop = new Field();
     int step = 0;
     bool pause = false;
 
@@ -54,13 +55,10 @@ namespace SphWpf {
 
     void intiParticals() {
       step = 1;
-      mainLoop = new Field();
       mainLoop.putParticals();
 
       map.Children.Clear();
       map.Background = Brushes.LightGreen;
-
-
 
       boundary = new Rectangle();
       boundary.Stroke = Brushes.Red;
@@ -69,14 +67,14 @@ namespace SphWpf {
       Canvas.SetLeft(boundary, 50);
       Canvas.SetBottom(boundary, 50);
 
-      pointList = new PointDD[mainLoop.pointCountX * mainLoop.pointCountY];
-      ellipses = new Ellipse[mainLoop.pointCountX * mainLoop.pointCountY];
+      pointList = new PointDD[mainLoop._pointCountX * mainLoop._pointCountY];
+      ellipses = new Ellipse[mainLoop._pointCountX * mainLoop._pointCountY];
       for (int i = 0; i < ellipses.Length; ++i) {
         var it = new Ellipse();
         it.Stroke = Brushes.Blue;
         it.StrokeThickness = 2;
-        it.Height = pointSize;
-        it.Width = pointSize;
+        it.Height = _pointSize;
+        it.Width = _pointSize;
         ellipses[i] = it;
         map.Children.Add(it);
       }
@@ -93,6 +91,7 @@ namespace SphWpf {
 
     private void button_Click(object sender, RoutedEventArgs e) {
       button.IsEnabled = false;
+      button1.Content = "Pause";
       button1.IsEnabled = true;
       button2.IsEnabled = false;
       pause = false;
@@ -199,8 +198,16 @@ namespace SphWpf {
 
 
     private void button2_Click(object sender, RoutedEventArgs e) {
-      ParametersDialog parameters = new ParametersDialog();
-      parameters.ShowDialog();
+      ParametersDialog parameters = new ParametersDialog(mainLoop);
+      if ((bool)parameters.ShowDialog()) {
+        mainLoop.putParticals();
+        var particalList = mainLoop.particalList;
+        for (int j = 0; j < particalList.Count; ++j) {
+          pointList[j].X = particalList[j].posX;
+          pointList[j].Y = particalList[j].posY;
+        }
+        drawParticals();
+      }
     }
   }
 }

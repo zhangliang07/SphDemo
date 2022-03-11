@@ -4,21 +4,24 @@ using System.Threading.Tasks;
 
 
 namespace SphWpf {
-  internal class Field {
-    public readonly bool _useAverageDensity = false;
-    public readonly double _stepTimeCoffient = 0.1;
+  public class Field {
+    public int _threadCount = 6;
+    public double _initialDeltaTime = 0.001;
+    public bool _useAverageDensity = false;
+    public double _stepTimeCoffient = 0.1;
 
-    public readonly double _gravityY = -9.8;
+    public double _gravityY = -9.8;
 
-    public readonly int pointCountX = 60;
-    public readonly int pointCountY = 60;
-    public readonly double pointLocationX = 0.01;
-    public readonly double pointLocationY = 0.01;
+    public int _pointCountX = 60;
+    public int _pointCountY = 60;
+    public double _pointLocationX = 0.01;
+    public double _pointLocationY = 0.01;
 
-    public readonly double _lowBound = 0;
-    public readonly double _upBound = 2.0;
-    public readonly double _leftBound = 0;
-    public readonly double _rightBound = 2.0;
+    public double _lowBound = 0;
+    public double _upBound = 2.0;
+    public double _leftBound = 0;
+    public double _rightBound = 2.0;
+    public double _BoundStiffness = 1e5;
 
     public double realTime = 0;
     double _deltaTime = 0.001;
@@ -26,7 +29,6 @@ namespace SphWpf {
     ParticalsZone particalsZone;
     public List<Partical> particalList = new List<Partical>();
 
-    int threadCount = 6;
     List<List<Partical>> particalThreadList = new List<List<Partical>>();
 
     public Field() {
@@ -42,27 +44,28 @@ namespace SphWpf {
       double initDensity, double mass, double pressure, 
       double c, double viscosity,
       double deltaTime, bool adjectiveDeltaTime = true) {
-      this.threadCount = threadCount;
+      this._threadCount = threadCount;
       particalsZone = new ParticalsZone(leftBound, lowBound, rightBound, upBound, h);
     }
 
 
     public void putParticals() {
+      _deltaTime = _initialDeltaTime;
       realTime = 0;
       particalList.Clear();
 
       int id = 1;
-      for (int i = 0; i < pointCountX; ++i) {
-        for (int j = 0; j < pointCountY; ++j) {
-          particalList.Add(new Partical(id, i * 0.01 + pointLocationX,
-            j  * 0.01 + pointLocationY, 0.001));
+      for (int i = 0; i < _pointCountX; ++i) {
+        for (int j = 0; j < _pointCountY; ++j) {
+          particalList.Add(new Partical(id, i * 0.01 + _pointLocationX,
+            j  * 0.01 + _pointLocationY));
           ++id;
         }
       }
 
       particalThreadList.Clear();
-      int count = (int)(particalList.Count / threadCount) + 1;
-      for (int i = 0; i < threadCount; ++i) {
+      int count = (int)(particalList.Count / _threadCount) + 1;
+      for (int i = 0; i < _threadCount; ++i) {
         int c = count;
         if (i * count + count > particalList.Count) c = particalList.Count - i * count;
         particalThreadList.Add(particalList.GetRange(i * count, c));
@@ -162,18 +165,17 @@ namespace SphWpf {
       bool result = false;
 
       //check boundary
-      double co = 1e5;
       if (posX < _leftBound) {
         //newPosX = _leftBound;
         //if (newVelX < 0) newVelX = -newVelX;
-        double newVelX2 = velX + co * (_leftBound - posX) * _deltaTime;
+        double newVelX2 = velX + _BoundStiffness * (_leftBound - posX) * _deltaTime;
         posX += (velX + newVelX2) / 2 * _deltaTime;
         velX = newVelX2;
         result = true;
       } else if (posX > _rightBound) {
         //newPosX = _rightBound;
         //if (newVelX > 0) newVelX = -newVelX;
-        double newVelX2 = velX + co * (_rightBound - posX) * _deltaTime;
+        double newVelX2 = velX + _BoundStiffness * (_rightBound - posX) * _deltaTime;
         posX += (velX + newVelX2) / 2 * _deltaTime;
         velX = newVelX2;
         result = true;
@@ -182,14 +184,14 @@ namespace SphWpf {
       if (posY < _lowBound) {
         //newPosY = _lowBound;
         //if (newVelY < 0) newVelY = -newVelY;
-        double newVelY2 = velY + co * (_lowBound - posY) * _deltaTime;
+        double newVelY2 = velY + _BoundStiffness * (_lowBound - posY) * _deltaTime;
         posY += (velY + newVelY2) / 2 * _deltaTime;
         velY = newVelY2;
         result = true;
       } else if (posY > _upBound) {
         //newPosY = _upBound;
         //if (newVelY > 0) newVelY = -newVelY;
-        double newVelY2 = velY + co * (_upBound - posY) * _deltaTime;
+        double newVelY2 = velY + _BoundStiffness * (_upBound - posY) * _deltaTime;
         posY += (velY + newVelY2) / 2 * _deltaTime;
         velY = newVelY2;
         result = true;

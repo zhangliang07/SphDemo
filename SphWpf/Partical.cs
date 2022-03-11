@@ -7,31 +7,32 @@ using System.Threading.Tasks;
 
 
 namespace SphWpf {
-  internal class Partical {
-    public static double _c = 0.01f;
-    public static double _initDensity = 1000.0f;
+  public class Partical {
+    public static double _c = 0.01d;
+    public static double _initmass = 0.001d;
+    public static double _initDensity = 1000.0d;
     public static double _viscosityNormal1 = 1;
     public static double _viscosityNormal2 = -1;
     public static double _viscosityShear1 = 1;
     public static double _viscosityShear2 = 1;
 
     public readonly int id = 0;
-    public double posX = 0.0f;
-    public double posY = 0.0f;
-    public double velX = 0.0f;
-    public double velY = 0.0f;
-    public double mass = 0.001f;
+    public double posX = 0.0;
+    public double posY = 0.0;
+    public double velX = 0.0;
+    public double velY = 0.0;
+    public double mass = 0.001d;
     public double density = _initDensity;
 
     double pressure = 0f;
-    double tauXX, tauXY, tauYY, tauYX = 0.0f;
+    double tauXX, tauXY, tauYY, tauYX = 0.0;
 
 
-    public Partical(int id, double x, double y, double mass) {
+    public Partical(int id, double x, double y) {
       this.id = id;
       posX = x;
       posY = y;
-      this.mass = mass;
+      this.mass = _initmass;
     }
 
 
@@ -96,7 +97,7 @@ namespace SphWpf {
         }
       }
 
-      //which one is currect?
+      //which parameters is currect?
       this.tauXX = _viscosityNormal1 * dVx_diff_dx + _viscosityNormal2 * dVy_diff_dx;
       this.tauYY = _viscosityNormal1 * dVy_diff_dy + _viscosityNormal2 * dVx_diff_dy;
 
