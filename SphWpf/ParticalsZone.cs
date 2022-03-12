@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 
 
@@ -30,7 +26,7 @@ namespace SphWpf {
       xiMax = (int)((rightBound - leftBound) / h) + 1;
       yiMax = (int)((upBound - lowBound) / h) + 1;
       zones = new List<Partical>[xiMax, yiMax];
-      for(int i = 0; i < xiMax; ++i) {
+      for (int i = 0; i < xiMax; ++i) {
         for (int j = 0; j < yiMax; ++j) {
           zones[i, j] = new List<Partical>();
         }
@@ -46,7 +42,7 @@ namespace SphWpf {
       foreach (var point in particalList) {
         int xi = (int)((point.posX - _leftBound) / _h);
         int yi = (int)((point.posY - _lowBound) / _h);
-        if (xi <0) xi = 0;
+        if (xi < 0) xi = 0;
         if (xi >= xiMax) xi = xiMax - 1;
         if (yi < 0) yi = 0;
         if (yi >= yiMax) yi = yiMax - 1;

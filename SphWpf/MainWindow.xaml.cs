@@ -49,16 +49,16 @@ namespace SphWpf {
 
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
-      intiParticals();
+      initParticals();
     }
 
 
-    void intiParticals() {
+    void initParticals() {
       step = 1;
       mainLoop.putParticals();
 
       map.Children.Clear();
-      map.Background = Brushes.LightGreen;
+      //map.Background = Brushes.LightYellow;
 
       boundary = new Rectangle();
       boundary.Stroke = Brushes.Red;
@@ -85,7 +85,7 @@ namespace SphWpf {
         pointList[j].Y = particalList[j].posY;
       }
       drawParticals();
-      textBox.Text =  "set particals\n";
+      textBox.Text = "set particals\n";
     }
 
 
@@ -96,7 +96,7 @@ namespace SphWpf {
       button2.IsEnabled = false;
       pause = false;
 
-      intiParticals();
+      initParticals();
 
       backgroundWorker.RunWorkerAsync();
     }
@@ -158,7 +158,7 @@ namespace SphWpf {
       button.IsEnabled = true;
       button2.IsEnabled = true;
 
-      if(!e.Cancelled) button1.IsEnabled = false;
+      if (!e.Cancelled) button1.IsEnabled = false;
     }
 
 
@@ -174,8 +174,8 @@ namespace SphWpf {
       boundary.Height = windowH;
       //map.Children.Clear();
       for (int i = 0; i < pointList.Length; ++i) {
-        Canvas.SetLeft(ellipses[i], pointList[i].X * windowW / weight + 50);
-        Canvas.SetBottom(ellipses[i], pointList[i].Y * windowH / height + 50);
+        Canvas.SetLeft(ellipses[i], (pointList[i].X - mainLoop._leftBound) * windowW / weight + 50);
+        Canvas.SetBottom(ellipses[i], (pointList[i].Y - mainLoop._lowBound) * windowH / height + 50);
       }
     }
 
@@ -200,13 +200,7 @@ namespace SphWpf {
     private void button2_Click(object sender, RoutedEventArgs e) {
       ParametersDialog parameters = new ParametersDialog(mainLoop);
       if ((bool)parameters.ShowDialog()) {
-        mainLoop.putParticals();
-        var particalList = mainLoop.particalList;
-        for (int j = 0; j < particalList.Count; ++j) {
-          pointList[j].X = particalList[j].posX;
-          pointList[j].Y = particalList[j].posY;
-        }
-        drawParticals();
+        initParticals();
       }
     }
   }

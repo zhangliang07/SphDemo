@@ -41,7 +41,7 @@ namespace SphWpf {
       double leftBound, double lowBound,
       double rightBound, double upBound, double h,
       double gravityY, double pointSize, int pointCountX, int pointCountY,
-      double initDensity, double mass, double pressure, 
+      double initDensity, double mass, double pressure,
       double c, double viscosity,
       double deltaTime, bool adjectiveDeltaTime = true) {
       this._threadCount = threadCount;
@@ -58,7 +58,7 @@ namespace SphWpf {
       for (int i = 0; i < _pointCountX; ++i) {
         for (int j = 0; j < _pointCountY; ++j) {
           particalList.Add(new Partical(id, i * 0.01 + _pointLocationX,
-            j  * 0.01 + _pointLocationY));
+            j * 0.01 + _pointLocationY));
           ++id;
         }
       }
@@ -129,10 +129,10 @@ namespace SphWpf {
         point.computeVelocity(neighborList, out double dvxdt, out double dvydt);
         dvydt += _gravityY;
 
-        point.velX = point.velX + dvxdt * _deltaTime;
-        point.velY = point.velY + dvydt * _deltaTime;
-        point.posX = point.posX + (point.velX + 0.5 * dvxdt * _deltaTime) * _deltaTime;
-        point.posY = point.posY + (point.velY + 0.5 * dvydt * _deltaTime) * _deltaTime;
+        point.velX += dvxdt * _deltaTime;
+        point.velY += dvydt * _deltaTime;
+        point.posX += (point.velX + 0.5 * dvxdt * _deltaTime) * _deltaTime;
+        point.posY += (point.velY + 0.5 * dvydt * _deltaTime) * _deltaTime;
 
         checkBoundary(ref point.velX, ref point.velY, ref point.posX, ref point.posY);
 
@@ -227,7 +227,7 @@ namespace SphWpf {
       }
       Task.WaitAll(taskList2);
 
-      MaxVelInfo maxVelInfo = new MaxVelInfo{maxVelX = 0, maxVelY = 0, maxAccX = 0, maxAccY = 0};
+      MaxVelInfo maxVelInfo = new MaxVelInfo { maxVelX = 0, maxVelY = 0, maxAccX = 0, maxAccY = 0 };
       for (int i = 0; i < particalThreadList.Count; ++i) {
         var info = taskList2[i].Result;
         if (Math.Abs(info.maxVelX) > Math.Abs(maxVelInfo.maxVelX)) maxVelInfo.maxVelX = info.maxVelX;

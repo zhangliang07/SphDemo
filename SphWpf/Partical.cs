@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 
 
@@ -21,8 +17,8 @@ namespace SphWpf {
     public double posY = 0.0;
     public double velX = 0.0;
     public double velY = 0.0;
-    public double mass = 0.001d;
     public double density = _initDensity;
+    readonly double mass = 0.001d;
 
     double pressure = 0f;
     double tauXX, tauXY, tauYY, tauYX = 0.0;
@@ -41,7 +37,7 @@ namespace SphWpf {
       double totalVolumn = 0;
       foreach (var list in neigborList) {
         foreach (var point in list) {
-          if (this.id == point.id) continue;
+          //if (this.id == point.id) continue;
 
           double w = KenelFunction.kenel(this, point);
           totalMaxx += point.mass * w;
@@ -59,7 +55,7 @@ namespace SphWpf {
 
       foreach (var list in neigborList) {
         foreach (var point in list) {
-          if (this.id == point.id) continue;
+          //if (this.id == point.id) continue;
 
           KenelFunction.kenelDerivative(this, point, out double dwdx, out double dwdy);
           dpdt += this.density * point.mass / point.density
@@ -85,7 +81,7 @@ namespace SphWpf {
       double dVy_diff_dy = 0;
       foreach (var list in neigborList) {
         foreach (var point in list) {
-          if (this.id == point.id) continue;
+          //if (this.id == point.id) continue;
 
           KenelFunction.kenelDerivative(this, point, out double dwdx, out double dwdy);
           double vxdiff = point.mass / point.density * (point.velX - this.velX);
@@ -113,7 +109,7 @@ namespace SphWpf {
 
       foreach (var list in neigborList) {
         foreach (var point in list) {
-          if (this.id == point.id) continue;
+          //if (this.id == point.id) continue;
 
           KenelFunction.kenelDerivative(this, point, out double dwdx, out double dwdy);
           double temp = point.density / (this.density * point.density);

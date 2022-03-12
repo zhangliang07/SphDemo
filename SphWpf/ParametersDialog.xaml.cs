@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace SphWpf {
   /// <summary>
@@ -11,7 +10,7 @@ namespace SphWpf {
 
     Field field = null;
     class DataItem {
-      public string name { get;}
+      public string name { get; }
       public double value { get; set; }
 
       public DataItem(string name, double value) {
@@ -35,33 +34,35 @@ namespace SphWpf {
       checkBox.IsChecked = field._useAverageDensity;
       parameters.Clear();
       parameters.Add(new DataItem("thread count for calculation", field._threadCount));
-      parameters.Add(new DataItem("delta time between steps", field._initialDeltaTime));
-      parameters.Add(new DataItem("left bound of the feild", field._leftBound));
-      parameters.Add(new DataItem("right bound of the feild", field._rightBound));
-      parameters.Add(new DataItem("low bound of the feild", field._lowBound));
-      parameters.Add(new DataItem("up bound of the feild", field._upBound));
-      parameters.Add(new DataItem("particals left position", field._pointLocationX));
-      parameters.Add(new DataItem("particals right position", field._pointLocationY));
+      parameters.Add(new DataItem("delta time between steps (s)", field._initialDeltaTime));
+      parameters.Add(new DataItem("left bound of the feild (m)", field._leftBound));
+      parameters.Add(new DataItem("right bound of the feild (m)", field._rightBound));
+      parameters.Add(new DataItem("low bound of the feild (m)", field._lowBound));
+      parameters.Add(new DataItem("up bound of the feild (m)", field._upBound));
+      parameters.Add(new DataItem("particals left position (m)", field._pointLocationX));
+      parameters.Add(new DataItem("particals right position (m)", field._pointLocationY));
       parameters.Add(new DataItem("particals count along X", field._pointCountX));
       parameters.Add(new DataItem("particals count along Y", field._pointCountY));
-      parameters.Add(new DataItem("gravity along Y", field._gravityY));
-      parameters.Add(new DataItem("search radius of kenel finction", KenelFunction._h));
-      parameters.Add(new DataItem("mass of each partical", Partical._initmass));
-      parameters.Add(new DataItem("initial density of each partical", Partical._initDensity));
+      parameters.Add(new DataItem("gravity along Y (m/s^2)", field._gravityY));
+      parameters.Add(new DataItem("search radius of kenel finction (m), h", KenelFunction._h));
+      parameters.Add(new DataItem("mass of each partical (kg)", Partical._initmass));
+      parameters.Add(new DataItem("initial density of each partical (kg/m^2)", Partical._initDensity));
       parameters.Add(new DataItem("stiffness of the liquid, c", Partical._c));
       parameters.Add(new DataItem("coefficient 1 of normal viscosity, u1", Partical._viscosityNormal1));
       parameters.Add(new DataItem("coefficient 2 of normal viscosity, u2", Partical._viscosityNormal2));
       parameters.Add(new DataItem("coefficient 3 of shear viscosity, u3", Partical._viscosityShear1));
       parameters.Add(new DataItem("coefficient 4 of shear viscosity, u4", Partical._viscosityShear2));
-      parameters.Add(new DataItem("stiffness of the boundary", field._BoundStiffness));
+      parameters.Add(new DataItem("stiffness of the boundary (N/m)", field._BoundStiffness));
+      parameters.Add(new DataItem("partical size on screen", MainWindow._pointSize));
     }
 
 
     private void Ok_Click(object sender, RoutedEventArgs e) {
       field._useAverageDensity = (bool)checkBox.IsChecked;
-
       try {
+        if (parameters[0].value < 1) parameters[0].value = 1;
         field._threadCount = (int)parameters[0].value;
+
         field._initialDeltaTime = parameters[1].value;
         field._leftBound = parameters[2].value;
         field._rightBound = parameters[3].value;
@@ -81,8 +82,12 @@ namespace SphWpf {
         Partical._viscosityShear1 = parameters[17].value;
         Partical._viscosityShear2 = parameters[18].value;
         field._BoundStiffness = parameters[19].value;
-      } catch (Exception ex) {
-        MessageBox.Show("A parameter is not a number.", "error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+        if (parameters[20].value < 1) parameters[20].value = 1;
+        MainWindow._pointSize = parameters[20].value;
+      } catch (Exception) {
+        MessageBox.Show("A parameter is not a number.", "error",
+          MessageBoxButton.OK, MessageBoxImage.Error);
         return;
       }
 
