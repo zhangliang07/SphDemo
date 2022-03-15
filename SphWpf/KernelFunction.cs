@@ -3,13 +3,13 @@ using System.Runtime.CompilerServices;
 
 
 namespace SphWpf {
-  internal static class KenelFunction {
+  internal static class KernelFunction {
     public static double _h = 0.05d;
     static double _ad = 15.0d / (7 * Math.PI * _h * _h);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double kenel(in Partical self, in Partical other) {
+    public static double kernel(in Particle self, in Particle other) {
       double xdiff = self.posX - other.posX;
       double ydiff = self.posY - other.posY;
       double dis = Math.Sqrt(xdiff * xdiff + ydiff * ydiff) / _h;
@@ -26,7 +26,7 @@ namespace SphWpf {
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void kenelDerivative(in Partical self, in Partical other,
+    public static void kernelDerivative(in Particle self, in Particle other,
       out double dwdx, out double dwdy) {
       double h = _h;
       double xdiff = self.posX - other.posX;

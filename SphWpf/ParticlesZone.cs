@@ -3,8 +3,8 @@
 
 
 namespace SphWpf {
-  internal class ParticalsZone {
-    List<Partical>[,] zones;
+  internal class ParticlesZone {
+    List<Particle>[,] zones;
 
     readonly double _lowBound;
     readonly double _upBound;
@@ -15,7 +15,7 @@ namespace SphWpf {
     readonly int xiMax = 0;
     readonly int yiMax = 0;
 
-    public ParticalsZone(double leftBound, double lowBound,
+    public ParticlesZone(double leftBound, double lowBound,
       double rightBound, double upBound, double h) {
       _leftBound = leftBound;
       _lowBound = lowBound;
@@ -25,16 +25,16 @@ namespace SphWpf {
 
       xiMax = (int)((rightBound - leftBound) / h) + 1;
       yiMax = (int)((upBound - lowBound) / h) + 1;
-      zones = new List<Partical>[xiMax, yiMax];
+      zones = new List<Particle>[xiMax, yiMax];
       for (int i = 0; i < xiMax; ++i) {
         for (int j = 0; j < yiMax; ++j) {
-          zones[i, j] = new List<Partical>();
+          zones[i, j] = new List<Particle>();
         }
       }
     }
 
 
-    public void SortAllParticals(in List<Partical> particalList) {
+    public void SortAllParticals(in List<Particle> particalList) {
       foreach (var it in zones) {
         it.Clear();
       }
@@ -51,11 +51,11 @@ namespace SphWpf {
     }
 
 
-    public List<List<Partical>> GetNeigbors(in Partical partical) {
+    public List<List<Particle>> GetNeigbors(in Particle partical) {
       int xi = (int)((partical.posX - _leftBound) / _h);
       int yi = (int)((partical.posY - _lowBound) / _h);
 
-      List<List<Partical>> list = new List<List<Partical>>();
+      List<List<Particle>> list = new List<List<Particle>>();
 
       int x = xi;
       int y = yi;
@@ -94,7 +94,7 @@ namespace SphWpf {
     }
 
 
-    void computeLocation(in Partical partical, out int xi, out int yi) {
+    void computeLocation(in Particle partical, out int xi, out int yi) {
       xi = (int)((partical.posX - _leftBound) / _h);
       yi = (int)((partical.posY - _lowBound) / _h);
     }

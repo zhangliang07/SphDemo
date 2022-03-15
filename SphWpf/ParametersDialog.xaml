@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SphWpf"
         mc:Ignorable="d"
-        Title="Parameters" Height="600" Width="660">
+        Title="Parameters" Height="750" Width="750">
   <Grid Margin="5,5,5,5">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*"/>
@@ -26,7 +26,7 @@
     <CheckBox Grid.Row="1" x:Name="checkBox" Content="calculate partical's density by average density instead of dv/dt" HorizontalAlignment="Left" Margin="0,10,0,10" Grid.ColumnSpan="2"/>
     <Button Grid.Row="2" x:Name="Ok" Content="OK" HorizontalAlignment="Right" Width="100" Height="25" Click="Ok_Click" Grid.Column="1" Margin="0,5,10,5"/>
     <Button Grid.Row="2" x:Name="Cancel" Content="Cancel" HorizontalAlignment="Right" Margin="0,5,120,5" Width="100" Height="25" Click="Cancel_Click" Grid.Column="1"/>
-    <Image Grid.Column="1" Source="/Resources/equations.png" Margin="5,10,5,5" VerticalAlignment="Top"/>
+    <Image Grid.Column="1" Source="/Resources/equations.png" Margin="5,5,5,0" VerticalAlignment="Top"/>
     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left"/>
   </Grid>
 </Window>

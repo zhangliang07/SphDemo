@@ -99,7 +99,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="KenelFunction.cs" />
+    <Compile Include="KernelFunction.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -114,8 +114,8 @@
     <Compile Include="ParametersDialog.xaml.cs">
       <DependentUpon>ParametersDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Partical.cs" />
-    <Compile Include="ParticalsZone.cs" />
+    <Compile Include="Particle.cs" />
+    <Compile Include="ParticlesZone.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
