@@ -2,32 +2,31 @@
 using System.Collections.Generic;
 
 
+
 namespace SphWpf {
   public class Particle {
-    public static double _c_stiffness = 500d;
-    public static double _initmass = 0.1d;
+    public static double _c_stiffness = 10d;
+    public static double _initmass = 0.001d;
     public static double _initDensity = 1000.0d;
-    public static double _viscosityNormal1 = 500;
+    public static double _viscosityNormal1 = 0;
     public static double _viscosityNormal2 = 0;
-    public static double _viscosityShear1 = 500;
+    public static double _viscosityShear1 = 0;
     public static double _viscosityShear2 = 0;
     public static double _initTemperature = 293.15;
     public static double _heatCapacity = 4200;
-    public static double _thermalTransmissivity = 5.9e5;
+    public static double _thermalTransmissivity = 0.59e9;
 
     public readonly int id = 0;
     public double posX = 0.0;
     public double posY = 0.0;
-    public double newPosX = 0.0;
-    public double newPosY = 0.0;
     public double velX = 0.0;
     public double velY = 0.0;
     public double density = _initDensity;
     public double temperature = _initTemperature;
 
-    readonly double mass = 0.1d;
+    readonly double mass = 0.001d;
 
-    double pressure = 0f;
+    double pressure = 10000f;
     double tauXX, tauXY, tauYY, tauYX = 0.0;
     double temperatureGradientX, temperatureGradientY = 0.0;
 
@@ -36,9 +35,8 @@ namespace SphWpf {
       this.id = id;
       posX = x;
       posY = y;
-      
       this.mass = _initmass;
-      //this.pressure = (60 * 0.01 - y) * density * 9.8;
+      this.pressure = (y - 0.01) * density * 9.8;
     }
 
 
@@ -79,8 +77,7 @@ namespace SphWpf {
 
     public void computePressrue() {
       //this.pressure = _c_stiffness * (Math.Pow(this.density / _initDensity, 7) - 1);
-      this.pressure = _c_stiffness * (this.density - _initDensity);
-      if (this.pressure < 0) this.pressure = 0;
+      //this.pressure = _c_stiffness * _c_stiffness * this.density;
     }
 
 
@@ -137,13 +134,13 @@ namespace SphWpf {
           KernelFunction.kernelDerivative(this, point, out double dwdx, out double dwdy);
           double temp = point.mass / (this.density * point.density);
 
-          dvxdt += -temp * (this.pressure + point.pressure) * dwdx;
-          dvxdt += temp * (this.tauXX + point.tauXX) * dwdx;
-          dvxdt += temp * (this.tauXY + point.tauXY) * dwdy;
+          dvxdt += temp * (this.pressure + point.pressure) * dwdx;
+          //dvxdt += temp * (this.tauXX + point.tauXX) * dwdx;
+          //dvxdt += temp * (this.tauXY + point.tauXY) * dwdy;
 
-          dvydt += -temp * (this.pressure + point.pressure) * dwdy;
-          dvydt += temp * (this.tauYY + point.tauYY) * dwdy;
-          dvydt += temp * (this.tauYX + point.tauYX) * dwdx;
+          dvydt += temp * (this.pressure + point.pressure) * dwdy;
+          //dvydt += temp * (this.tauYY + point.tauYY) * dwdy;
+          //dvydt += temp * (this.tauYX + point.tauYX) * dwdx;
 
           temp = temp * _thermalTransmissivity / _heatCapacity;
           dTdt += temp * (this.temperatureGradientX + point.temperatureGradientX) * dwdx;

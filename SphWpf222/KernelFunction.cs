@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace SphWpf {
   internal static class KernelFunction {
-    public static double _h = 0.04d;
+    public static double _h = 0.05d;
     static double _ad = 15.0d / (7 * Math.PI * _h * _h);
 
 

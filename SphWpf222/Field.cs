@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace SphWpf {
   public class Field {
     public int _threadCount = 6;
-    public double _initialDeltaTime = 0.001;
+    public double _initialDeltaTime = 0.01;
     public bool _useAverageDensity = false;
     public double _stepTimeCoffient = 0.1;
 
@@ -18,12 +18,12 @@ namespace SphWpf {
     public double _pointLocationY = 0.01;
 
     public double _lowBorder = 0;
-    public double _upBorder = 3;
+    public double _upBorder = 2.0;
     public double _leftBorder = 0;
-    public double _rightBorder = 3;
-    public double _borderStiffness = 1;
-    public double _borderTemperature = 573.15;
-    public double _borderThermalTransmissivity = 1e7;
+    public double _rightBorder = 2.0;
+    public double _borderStiffness = 1e5;
+    public double _borderTemperature = 373.15;
+    public double _borderThermalTransmissivity = 1e8;
 
     public double realTime = 0;
     double _deltaTime = 0.001;
@@ -59,8 +59,8 @@ namespace SphWpf {
       int id = 1;
       for (int i = 0; i < _pointCountX; ++i) {
         for (int j = 0; j < _pointCountY; ++j) {
-          particalList.Add(new Particle(id, i * 0.02 + _pointLocationX,
-            j * 0.02 + _pointLocationY));
+          particalList.Add(new Particle(id, i * 0.01 + _pointLocationX,
+            j * 0.01 + _pointLocationY));
           ++id;
         }
       }
@@ -139,10 +139,10 @@ namespace SphWpf {
           out double dvxdt, out double dvydt, out double dTdt);
         dvydt += _gravityY;
 
-        point.newPosX = point.posX + (point.velX + 0.5 * dvxdt * _deltaTime) * _deltaTime;
-        point.newPosY = point.posY + (point.velY + 0.5 * dvydt * _deltaTime) * _deltaTime;
         point.velX += dvxdt * _deltaTime;
         point.velY += dvydt * _deltaTime;
+        point.posX += (point.velX + 0.5 * dvxdt * _deltaTime) * _deltaTime;
+        point.posY += (point.velY + 0.5 * dvydt * _deltaTime) * _deltaTime;
 
         point.temperature += dTdt * _deltaTime;
 
@@ -173,36 +173,27 @@ namespace SphWpf {
     }
 
 
-    public void updatePosition(object input) {
-      List<Particle> pointList = input as List<Particle>;
-      foreach (var point in pointList) {
-        point.posX = point.newPosX;
-        point.posY = point.newPosY;
-      }
-    }
-
-
 
     bool checkBoundary(Particle point) {
       bool result = false;
 
       //check boundary
-      if (point.newPosX < _leftBorder) {
-        //point.newPosX = _leftBorder;
+      if (point.posX < _leftBorder) {
+        point.posX = _leftBorder;
         if(point.velX < 0) point.velX = -point.velX;
         result = true;
-      } else if (point.newPosX > _rightBorder) {
-        //point.newPosX = _rightBorder;
+      } else if (point.posX > _rightBorder) {
+        point.posX = _rightBorder;
         if (point.velX > 0) point.velX = -point.velX;
         result = true;
       }
 
-      if (point.newPosY < _lowBorder) {
-        //point.newPosY = _lowBorder;
+      if (point.posY < _lowBorder) {
+        point.posY = _lowBorder;
         if (point.velY < 0) point.velY = -point.velY;
         result = true;
-      } else if (point.newPosY > _upBorder) {;
-        //point.newPosY = _upBorder;
+      } else if (point.posY > _upBorder) {;
+        point.posY = _upBorder;
         if (point.velY > 0) point.velY = -point.velY;
         result = true;
       }
@@ -217,30 +208,31 @@ namespace SphWpf {
     }
 
 
-    bool checkBoundary222(Particle point) {
+    bool checkBoundary2(Particle point) {
       bool result = false;
 
       //check boundary
-      if (point.newPosX < _leftBorder) {
-        double newVelX2 = point.velX + _borderStiffness * (_leftBorder - point.newPosX) * _deltaTime;
-        point.newPosX += (point.velX + newVelX2) / 2 * _deltaTime;
+      if (point.posX < _leftBorder) {
+        double newVelX2 = point.velX + _borderStiffness * (_leftBorder - point.posX) * _deltaTime;
+        point.posX += (point.velX + newVelX2) / 2 * _deltaTime;
         point.velX = newVelX2;
         result = true;
-      } else if (point.newPosX > _rightBorder) {
-        double newVelX2 = point.velX + _borderStiffness * (_rightBorder - point.newPosX) * _deltaTime;
-        point.newPosX += (point.velX + newVelX2) / 2 * _deltaTime;
+      } else if (point.posX > _rightBorder) {
+        double newVelX2 = point.velX + _borderStiffness * (_rightBorder - point.posX) * _deltaTime;
+        point.posX += (point.velX + newVelX2) / 2 * _deltaTime;
         point.velX = newVelX2;
         result = true;
       }
 
-      if (point.newPosY < _lowBorder) {
-        double newVelY2 = point.velY + _borderStiffness * (_lowBorder - point.newPosY) * _deltaTime;
-        point.newPosY += (point.velY + newVelY2) / 2 * _deltaTime;
+      if (point.posY < _lowBorder) {
+        double newVelY2 = point.velY + _borderStiffness * (_lowBorder - point.posY) * _deltaTime;
+        point.posY += (point.velY + newVelY2) / 2 * _deltaTime;
         point.velY = newVelY2;
         result = true;
-      } else if (point.newPosY > _upBorder) {
-        double newVelY2 = point.velY + _borderStiffness * (_upBorder - point.newPosY) * _deltaTime;
-        point.newPosY += (point.velY + newVelY2) / 2 * _deltaTime;
+      } else if (point.posY > _upBorder) {
+        ;
+        double newVelY2 = point.velY + _borderStiffness * (_upBorder - point.posY) * _deltaTime;
+        point.posY += (point.velY + newVelY2) / 2 * _deltaTime;
         point.velY = newVelY2;
         result = true;
       }
@@ -258,14 +250,14 @@ namespace SphWpf {
     public string oneSetp() {
       Task[] taskList = new Task[particalThreadList.Count];
       //2. compute density and pressrue of every particals
-      var action = new Action<object>(computeDensity);
-      for (int i = 0; i < particalThreadList.Count; ++i) {
-        taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
-      }
-      Task.WaitAll(taskList);
+      //var action = new Action<object>(computeDensity);
+      //for (int i = 0; i < particalThreadList.Count; ++i) {
+      //  taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
+      //}
+      //Task.WaitAll(taskList);
 
       //3. compute pressrue and Viscous coefficient of every particals
-      action = new Action<object>(computePressrueAndViscous);
+     var  action = new Action<object>(computePressrueAndViscous);
       for (int i = 0; i < particalThreadList.Count; ++i) {
         taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
       }
@@ -290,16 +282,8 @@ namespace SphWpf {
         if (info.maxTemperature > maxVelInfo.maxTemperature) maxVelInfo.maxTemperature = info.maxTemperature;
       }
 
-      action = new Action<object>(updatePosition);
-      for (int i = 0; i < particalThreadList.Count; ++i) {
-        taskList[i] = Task.Factory.StartNew((Action<object>)action, particalThreadList[i]);
-      }
-      Task.WaitAll(taskList);
-
-
       particalsZone.SortAllParticals(particalList);
 
-      //abjective h
       //double maxAcc = Math.Sqrt(maxVelInfo.maxAccX * maxVelInfo.maxAccX
       //  + maxVelInfo.maxAccY * maxVelInfo.maxAccY);
       //if (maxAcc != 0) _deltaTime = _stepTimeCoffient * Math.Sqrt(KenelFunction._h / maxAcc);

@@ -38,8 +38,6 @@ namespace SphWpf {
       foreach (var it in zones) {
         it.Clear();
       }
-      //zones[0, 0].AddRange(particalList);
-      //return;
 
       foreach (var point in particalList) {
         int xi = (int)((point.posX - _leftBound) / _h);
@@ -54,12 +52,11 @@ namespace SphWpf {
 
 
     public List<List<Particle>> GetNeigbors(in Particle partical) {
-      List<List<Particle>> list = new List<List<Particle>>();
-      //list.Add(zones[0, 0]);
-      //return list;
-
       int xi = (int)((partical.posX - _leftBound) / _h);
       int yi = (int)((partical.posY - _lowBound) / _h);
+
+      List<List<Particle>> list = new List<List<Particle>>();
+
       int x = xi;
       int y = yi;
       if (x >= 0 && x < xiMax && y >= 0 && y < yiMax) list.Add(zones[x, y]);
