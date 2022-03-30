@@ -16,6 +16,7 @@ namespace SphWpf {
     public static double _pointSize = 5;
     public static double _lowTemperature = 293.15;
     public static double _highTemperature = 373.15;
+    public static int _maxStepCount = 10000;
 
     BackgroundWorker backgroundWorker;
     Field mainLoop = new Field();
@@ -114,7 +115,7 @@ namespace SphWpf {
 
 
     void DoWork(object sender, DoWorkEventArgs e) {
-      for (; step < 10000; ++step) {
+      for (; step < _maxStepCount; ++step) {
         string info = mainLoop.oneSetp();
 
         int time = Environment.TickCount - lastDrawTime;

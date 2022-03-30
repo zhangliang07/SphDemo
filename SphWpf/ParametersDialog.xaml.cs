@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 
+
 namespace SphWpf {
   /// <summary>
   /// Interaction logic for ParametersDialog.xaml
@@ -63,6 +64,7 @@ namespace SphWpf {
       parameters.Add(new DataItem("particle size on screen", MainWindow._pointSize));
       parameters.Add(new DataItem("lower temperature on screen for blue (℃)", MainWindow._lowTemperature - _KelvinTemperature));
       parameters.Add(new DataItem("higher temperature on screen for red (℃)", MainWindow._highTemperature - _KelvinTemperature));
+      parameters.Add(new DataItem("max count of time step", MainWindow._maxStepCount));
     }
 
 
@@ -101,6 +103,8 @@ namespace SphWpf {
         MainWindow._pointSize = parameters[25].value;
         MainWindow._lowTemperature = parameters[26].value + _KelvinTemperature;
         MainWindow._highTemperature= parameters[27].value + _KelvinTemperature;
+        MainWindow._maxStepCount = (int)parameters[28].value;
+
       } catch (Exception) {
         MessageBox.Show("A parameter is not a number.", "error",
           MessageBoxButton.OK, MessageBoxImage.Error);
