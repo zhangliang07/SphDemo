@@ -30,6 +30,7 @@ namespace SphWpf {
     }
     PointDD[] pointList;
     Ellipse[] ellipses;
+    Ellipse[] wallEllipses;
     Rectangle boundary;
 
     Mutex drawMutex = new Mutex();
@@ -75,8 +76,9 @@ namespace SphWpf {
       Canvas.SetLeft(boundary, 50);
       Canvas.SetBottom(boundary, 50);
 
-      pointList = new PointDD[mainLoop._pointCountX * mainLoop._pointCountY];
-      ellipses = new Ellipse[mainLoop._pointCountX * mainLoop._pointCountY];
+      //set the particles
+      pointList = new PointDD[mainLoop.particalList.Count];
+      ellipses = new Ellipse[mainLoop.particalList.Count];
       for (int i = 0; i < ellipses.Length; ++i) {
         var it = new Ellipse();
         it.Stroke = new SolidColorBrush(Colors.Blue);
@@ -87,15 +89,28 @@ namespace SphWpf {
         map.Children.Add(it);
       }
 
-      var particalList = mainLoop.particalList;
-      for (int j = 0; j < particalList.Count; ++j) {
-        Particle partical = particalList[j];
+      for (int j = 0; j < mainLoop.particalList.Count; ++j) {
+        Particle partical = mainLoop.particalList[j];
 
         pointList[j].X = partical.posX;
         pointList[j].Y = partical.posY;
         pointList[j].temperature = partical.temperature;
       }
       drawParticals();
+
+      //set the wall particles
+      wallEllipses = new Ellipse[mainLoop.wallParticalList.Count];
+      for (int i = 0; i < wallEllipses.Length; ++i) {
+        var it = new Ellipse();
+        it.Stroke = new SolidColorBrush(Colors.Gray);
+        it.StrokeThickness = 2;
+        it.Height = _pointSize;
+        it.Width = _pointSize;
+        wallEllipses[i] = it;
+        map.Children.Add(it);
+      }
+      drawWallParticals();
+
       textBox.Text = "set particals\n";
     }
 
@@ -179,7 +194,7 @@ namespace SphWpf {
     void drawParticals() {
       textBlock.Text = String.Format("real time: {0:g8} s", mainLoop.realTime);
 
-      double height = mainLoop._upBorder - mainLoop._lowBorder;
+      double height = mainLoop._topBorder - mainLoop._lowBorder;
       double weight = mainLoop._rightBorder - mainLoop._leftBorder;
       double windowH = map.ActualHeight - 100;
       double windowW = map.ActualWidth - 100;
@@ -194,6 +209,29 @@ namespace SphWpf {
         ((SolidColorBrush)ellipses[i].Stroke).Color = HslToRgb((float)hue, 1.0f, 0.4f);
         Canvas.SetLeft(ellipses[i], (pointList[i].X - mainLoop._leftBorder) * windowW / weight + 50);
         Canvas.SetBottom(ellipses[i], (pointList[i].Y - mainLoop._lowBorder) * windowH / height + 50);
+      }
+    }
+
+
+    void drawWallParticals() {
+      double height = mainLoop._topBorder - mainLoop._lowBorder;
+      double weight = mainLoop._rightBorder - mainLoop._leftBorder;
+      double windowH = map.ActualHeight - 100;
+      double windowW = map.ActualWidth - 100;
+
+      boundary.Width = windowW;
+      boundary.Height = windowH;
+
+      var particleList = mainLoop.wallParticalList;
+
+      //map.Children.Clear();
+      for (int i = 0; i < particleList.Count; ++i) {
+        double hue = 240.0 * (1.0 - (particleList[i].temperature - _lowTemperature) / (_highTemperature - _lowTemperature));
+        if (hue > 240) hue = 240;
+        if (hue < 0) hue = 0;
+        //((SolidColorBrush)wallEllipses[i].Stroke).Color = HslToRgb((float)hue, 1.0f, 0.4f);
+        Canvas.SetLeft(wallEllipses[i], (particleList[i].posX - mainLoop._leftBorder) * windowW / weight + 50);
+        Canvas.SetBottom(wallEllipses[i], (particleList[i].posY - mainLoop._lowBorder) * windowH / height + 50);
       }
     }
 

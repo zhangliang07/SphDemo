@@ -41,7 +41,8 @@ namespace SphWpf {
       parameters.Add(new DataItem("left border of the field (m)", field._leftBorder));
       parameters.Add(new DataItem("right border of the field (m)", field._rightBorder));
       parameters.Add(new DataItem("low border of the field (m)", field._lowBorder));
-      parameters.Add(new DataItem("up border of the field (m)", field._upBorder));
+      parameters.Add(new DataItem("up border of the field (m)", field._topBorder));
+      parameters.Add(new DataItem("thichness number of wall particles", field._wallThichnessNumber));
       parameters.Add(new DataItem("particles left position (m)", field._pointLocationX));
       parameters.Add(new DataItem("particles right position (m)", field._pointLocationY));
       parameters.Add(new DataItem("particles count along X", field._pointCountX));
@@ -78,32 +79,33 @@ namespace SphWpf {
         field._leftBorder = parameters[2].value;
         field._rightBorder = parameters[3].value;
         field._lowBorder = parameters[4].value;
-        field._upBorder = parameters[5].value;
-        field._pointLocationX = parameters[6].value;
-        field._pointLocationY = parameters[7].value;
-        field._pointCountX = (int)parameters[8].value;
-        field._pointCountY = (int)parameters[9].value;
-        field._gravityY = parameters[10].value;
-        KernelFunction._h = parameters[11].value;
-        Particle._initmass = parameters[12].value;
-        Particle._initDensity = parameters[13].value;
-        Particle._c_stiffness = parameters[14].value;
-        Particle._viscosityNormal1 = parameters[15].value;
-        Particle._viscosityNormal2 = parameters[16].value;
-        Particle._viscosityShear1 = parameters[17].value;
-        Particle._viscosityShear2 = parameters[18].value;
-        Particle._initTemperature = parameters[19].value + _KelvinTemperature;
-        Particle._heatCapacity = parameters[20].value;
-        Particle._thermalTransmissivity = parameters[21].value;
-        field._borderStiffness = parameters[22].value;
-        field._borderTemperature = parameters[23].value + _KelvinTemperature;
-        field._borderThermalTransmissivity = parameters[24].value;
+        field._topBorder = parameters[5].value;
+        field._wallThichnessNumber = (int)parameters[6].value;
+        field._pointLocationX = parameters[7].value;
+        field._pointLocationY = parameters[8].value;
+        field._pointCountX = (int)parameters[9].value;
+        field._pointCountY = (int)parameters[10].value;
+        field._gravityY = parameters[11].value;
+        KernelFunction._h = parameters[12].value;
+        Particle._initmass = parameters[13].value;
+        Particle._initDensity = parameters[14].value;
+        Particle._c_stiffness = parameters[15].value;
+        Particle._viscosityNormal1 = parameters[16].value;
+        Particle._viscosityNormal2 = parameters[17].value;
+        Particle._viscosityShear1 = parameters[18].value;
+        Particle._viscosityShear2 = parameters[19].value;
+        Particle._initTemperature = parameters[20].value + _KelvinTemperature;
+        Particle._heatCapacity = parameters[21].value;
+        Particle._thermalTransmissivity = parameters[22].value;
+        field._borderStiffness = parameters[23].value;
+        field._borderTemperature = parameters[24].value + _KelvinTemperature;
+        field._borderThermalTransmissivity = parameters[25].value;
 
-        if (parameters[20].value < 1) parameters[25].value = 1;
-        MainWindow._pointSize = parameters[25].value;
-        MainWindow._lowTemperature = parameters[26].value + _KelvinTemperature;
-        MainWindow._highTemperature= parameters[27].value + _KelvinTemperature;
-        MainWindow._maxStepCount = (int)parameters[28].value;
+        if (parameters[20].value < 1) parameters[26].value = 1;
+        MainWindow._pointSize = parameters[26].value;
+        MainWindow._lowTemperature = parameters[27].value + _KelvinTemperature;
+        MainWindow._highTemperature= parameters[28].value + _KelvinTemperature;
+        MainWindow._maxStepCount = (int)parameters[29].value;
 
       } catch (Exception) {
         MessageBox.Show("A parameter is not a number.", "error",

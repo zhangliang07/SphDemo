@@ -14,40 +14,35 @@ namespace SphWpf {
 
     public int _pointCountX = 60;
     public int _pointCountY = 60;
-    public double _pointLocationX = 0.01;
-    public double _pointLocationY = 0.01;
+    public double _pointLocationX = 0.11;
+    public double _pointLocationY = 0.11;
 
     public double _lowBorder = 0;
-    public double _upBorder = 3;
+    public double _topBorder = 3;
     public double _leftBorder = 0;
     public double _rightBorder = 3;
+    public int _wallThichnessNumber = 5;
     public double _borderStiffness = 1;
     public double _borderTemperature = 573.15;
-    public double _borderThermalTransmissivity = 1e7;
+    public double _borderThermalTransmissivity = 1e5;
 
     public double realTime = 0;
     double _deltaTime = 0.001;
 
+    const double _interval = 0.02;
+
     ParticlesZone particalsZone;
+    ParticlesZone wallParticalsZone;
     public List<Particle> particalList = new List<Particle>();
+    public List<Particle> wallParticalList = new List<Particle>();
 
     List<List<Particle>> particalThreadList = new List<List<Particle>>();
 
     public Field() {
-      particalsZone = new ParticlesZone(_leftBorder, _lowBorder, _rightBorder, _upBorder,
+      particalsZone = new ParticlesZone(_leftBorder, _lowBorder, _rightBorder, _topBorder,
         2 * KernelFunction._h);
-    }
-
-
-    public Field(int threadCount,
-      double leftBound, double lowBound,
-      double rightBound, double upBound, double h,
-      double gravityY, double pointSize, int pointCountX, int pointCountY,
-      double initDensity, double mass, double pressure,
-      double c, double viscosity,
-      double deltaTime, bool adjectiveDeltaTime = true) {
-      this._threadCount = threadCount;
-      particalsZone = new ParticlesZone(leftBound, lowBound, rightBound, upBound, h);
+      wallParticalsZone = new ParticlesZone(_leftBorder, _lowBorder, _rightBorder, _topBorder,
+        2 * KernelFunction._h);
     }
 
 
@@ -56,12 +51,11 @@ namespace SphWpf {
       realTime = 0;
       particalList.Clear();
 
-      int id = 1;
+      //put particals
       for (int i = 0; i < _pointCountX; ++i) {
         for (int j = 0; j < _pointCountY; ++j) {
-          particalList.Add(new Particle(id, i * 0.02 + _pointLocationX,
-            j * 0.02 + _pointLocationY));
-          ++id;
+          particalList.Add(new Particle(i * _interval + _pointLocationX,
+            j * _interval + _pointLocationY, Particle._initTemperature, false));
         }
       }
 
@@ -73,11 +67,28 @@ namespace SphWpf {
         if (i * count + count > particalList.Count) c = particalList.Count - i * count;
         particalThreadList.Add(particalList.GetRange(i * count, c));
       }
-
       particalsZone.SortAllParticals(particalList);
+
+      //put wallPartilcals
+      wallParticalList.Clear();
+
+      //top block of wall particles
+      for (int i = 0; i < _wallThichnessNumber; ++i) {
+        for (double currentX = _leftBorder; currentX <= _rightBorder; currentX += _interval) {
+          wallParticalList.Add(new Particle(currentX, i * _interval, _borderTemperature, true));
+          wallParticalList.Add(new Particle(currentX, _topBorder - (i + 1) * _interval, _borderTemperature, true));
+        }
+      }
+
+      double top = _topBorder - _wallThichnessNumber * _interval;
+      for (double currentY = _wallThichnessNumber * _interval; currentY < top; currentY += _interval) {
+        for (int i = 0; i < _wallThichnessNumber; ++i) {
+          wallParticalList.Add(new Particle(i * _interval, currentY, _borderTemperature, true));
+          wallParticalList.Add(new Particle(_rightBorder - (i + 1) * _interval, currentY, _borderTemperature, true));
+        }
+      }
+      wallParticalsZone.SortAllParticals(wallParticalList);
     }
-
-
 
 
     void computeDensity(object input) {
@@ -86,12 +97,16 @@ namespace SphWpf {
       if (!_useAverageDensity) {
         foreach (var point in pointList) {
           var neighborList = particalsZone.GetNeigbors(point);
+          neighborList.AddRange(wallParticalsZone.GetNeigbors(point));
+          
           double dpdt = point.computeDensity(neighborList);
           point.density += dpdt * _deltaTime;
         }
       } else {
         foreach (var point in pointList) {
           var neighborList = particalsZone.GetNeigbors(point);
+          neighborList.AddRange(wallParticalsZone.GetNeigbors(point));
+
           point.density = point.computeDensityAbsolute(neighborList);
         }
       }
@@ -102,6 +117,8 @@ namespace SphWpf {
       List<Particle> pointList = input as List<Particle>;
       foreach (var point in pointList) {
         var neighborList = particalsZone.GetNeigbors(point);
+        neighborList.AddRange(wallParticalsZone.GetNeigbors(point));
+
         point.computePressrue();
         point.computeViscousAndThermalGradient(neighborList);
         //point.computeThermalGradient(neighborList);
@@ -135,6 +152,8 @@ namespace SphWpf {
       double maxAccYAbs = 0;
       foreach (var point in pointList) {
         var neighborList = particalsZone.GetNeigbors(point);
+        neighborList.AddRange(wallParticalsZone.GetNeigbors(point));
+
         point.computeVelocityAndThermal(neighborList,
           out double dvxdt, out double dvydt, out double dTdt);
         dvydt += _gravityY;
@@ -146,7 +165,7 @@ namespace SphWpf {
 
         point.temperature += dTdt * _deltaTime;
 
-        checkBoundary(point);
+        //checkBoundary(point);
 
         if (maxVelXAbs < Math.Abs(point.velX)) {
           maxVelXAbs = Math.Abs(point.velX);
@@ -188,21 +207,21 @@ namespace SphWpf {
 
       //check boundary
       if (point.newPosX < _leftBorder) {
-        //point.newPosX = _leftBorder;
-        if(point.velX < 0) point.velX = -point.velX;
+        point.newPosX = _leftBorder;
+        if (point.velX < 0) point.velX = -point.velX;
         result = true;
       } else if (point.newPosX > _rightBorder) {
-        //point.newPosX = _rightBorder;
+        point.newPosX = _rightBorder;
         if (point.velX > 0) point.velX = -point.velX;
         result = true;
       }
 
       if (point.newPosY < _lowBorder) {
-        //point.newPosY = _lowBorder;
+        point.newPosY = _lowBorder;
         if (point.velY < 0) point.velY = -point.velY;
         result = true;
-      } else if (point.newPosY > _upBorder) {;
-        //point.newPosY = _upBorder;
+      } else if (point.newPosY > _topBorder) {;
+        point.newPosY = _topBorder;
         if (point.velY > 0) point.velY = -point.velY;
         result = true;
       }
@@ -238,8 +257,8 @@ namespace SphWpf {
         point.newPosY += (point.velY + newVelY2) / 2 * _deltaTime;
         point.velY = newVelY2;
         result = true;
-      } else if (point.newPosY > _upBorder) {
-        double newVelY2 = point.velY + _borderStiffness * (_upBorder - point.newPosY) * _deltaTime;
+      } else if (point.newPosY > _topBorder) {
+        double newVelY2 = point.velY + _borderStiffness * (_topBorder - point.newPosY) * _deltaTime;
         point.newPosY += (point.velY + newVelY2) / 2 * _deltaTime;
         point.velY = newVelY2;
         result = true;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace SphWpf {
   public class Particle {
+    public static int totalCount = 0;
     public static double _c_stiffness = 500d;
     public static double _initmass = 0.1d;
     public static double _initDensity = 1000.0d;
@@ -13,7 +14,7 @@ namespace SphWpf {
     public static double _viscosityShear2 = 0;
     public static double _initTemperature = 293.15;
     public static double _heatCapacity = 4200;
-    public static double _thermalTransmissivity = 5.9e5;
+    public static double _thermalTransmissivity = 1e5;
 
     public readonly int id = 0;
     public double posX = 0.0;
@@ -31,14 +32,23 @@ namespace SphWpf {
     double tauXX, tauXY, tauYY, tauYX = 0.0;
     double temperatureGradientX, temperatureGradientY = 0.0;
 
+    public bool isFixed = false;    //the fixed particles are not changed in any property
 
-    public Particle(int id, double x, double y) {
-      this.id = id;
+
+    public Particle(double x, double y, double temperature, bool isFixed) {
+      ++totalCount;
+      id = totalCount;
       posX = x;
       posY = y;
-      
+
+      this.temperature = temperature;
       this.mass = _initmass;
       //this.pressure = (60 * 0.01 - y) * density * 9.8;
+
+      if (isFixed) {
+        mass *= 1e6;
+        density *= 1e6;
+      }
     }
 
 
