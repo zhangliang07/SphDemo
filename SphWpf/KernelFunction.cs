@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace SphWpf {
   internal static class KernelFunction {
     public static double _h = 0.04d;
-    static double _ad = 15.0d / (7 * Math.PI * _h * _h);
+    static double _ad = 15d / (7d * Math.PI * _h * _h);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -18,7 +18,7 @@ namespace SphWpf {
       if (dis < 1.0d)
         w = _ad * (2d / 3d - dis * dis + 0.5 * dis * dis * dis);
       else if (dis < 2.0d)
-        w = _ad * 1 / 6 * Math.Pow((2d - dis), 3);
+        w = _ad * 1d / 6d * Math.Pow((2d - dis), 3);
       else w = 0;
 
       return w;

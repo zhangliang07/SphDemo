@@ -5,12 +5,12 @@ using System.Collections.Generic;
 namespace SphWpf {
   public class Particle {
     public static int totalCount = 0;
-    public static double _c_stiffness = 500d;
+    public static double _c_stiffness = 5000d;
     public static double _initmass = 0.1d;
     public static double _initDensity = 1000.0d;
-    public static double _viscosityNormal1 = 500;
+    public static double _viscosityNormal1 = 100;
     public static double _viscosityNormal2 = 0;
-    public static double _viscosityShear1 = 500;
+    public static double _viscosityShear1 = 100;
     public static double _viscosityShear2 = 0;
     public static double _initTemperature = 293.15;
     public static double _heatCapacity = 4200;
@@ -90,7 +90,7 @@ namespace SphWpf {
     public void computePressrue() {
       //this.pressure = _c_stiffness * (Math.Pow(this.density / _initDensity, 7) - 1);
       this.pressure = _c_stiffness * (this.density - _initDensity);
-      if (this.pressure < 0) this.pressure = 0;
+      //if (this.pressure < 0) this.pressure = 0;
     }
 
 
