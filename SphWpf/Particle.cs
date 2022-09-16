@@ -45,10 +45,10 @@ namespace SphWpf {
       this.mass = _initmass;
       //this.pressure = (60 * 0.01 - y) * density * 9.8;
 
-      if (isFixed) {
-        mass *= 1e6;
-        density *= 1e6;
-      }
+      //if (isFixed) {
+      //  mass *= 1e6;
+      //  density *= 1e6;
+      //}
     }
 
 
@@ -142,10 +142,11 @@ namespace SphWpf {
 
       foreach (var list in neigborList) {
         foreach (var point in list) {
-          //if (this.id == point.id) continue;
+          if (this.id == point.id) continue;
 
           KernelFunction.kernelDerivative(this, point, out double dwdx, out double dwdy);
           double temp = point.mass / (this.density * point.density);
+          //double temp = point.mass / (2 * point.density);
 
           dvxdt += -temp * (this.pressure + point.pressure) * dwdx;
           dvxdt += temp * (this.tauXX + point.tauXX) * dwdx;

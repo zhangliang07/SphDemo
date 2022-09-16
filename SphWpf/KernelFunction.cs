@@ -8,6 +8,12 @@ namespace SphWpf {
     static double _ad = 15d / (7d * Math.PI * _h * _h);
 
 
+    public static void update() {
+      _ad = 15d / (7d * Math.PI * _h * _h);
+      //_ad = 1;
+    }
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double kernel(in Particle self, in Particle other) {
       double xdiff = self.posX - other.posX;

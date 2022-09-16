@@ -44,7 +44,7 @@ namespace SphWpf {
       parameters.Add(new DataItem("up border of the field (m)", field._topBorder));
       parameters.Add(new DataItem("thichness number of wall particles", field._wallThichnessNumber));
       parameters.Add(new DataItem("particles left position (m)", field._pointLocationX));
-      parameters.Add(new DataItem("particles right position (m)", field._pointLocationY));
+      parameters.Add(new DataItem("particles bottom position (m)", field._pointLocationY));
       parameters.Add(new DataItem("particles count along X", field._pointCountX));
       parameters.Add(new DataItem("particles count along Y", field._pointCountY));
       parameters.Add(new DataItem("gravity along Y (m/s^2)", field._gravityY));
@@ -87,6 +87,7 @@ namespace SphWpf {
         field._pointCountY = (int)parameters[10].value;
         field._gravityY = parameters[11].value;
         KernelFunction._h = parameters[12].value;
+        KernelFunction.update();
         Particle._initmass = parameters[13].value;
         Particle._initDensity = parameters[14].value;
         Particle._c_stiffness = parameters[15].value;

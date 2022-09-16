@@ -50,6 +50,7 @@ namespace SphWpf {
       _deltaTime = _initialDeltaTime;
       realTime = 0;
       particalList.Clear();
+      Particle.totalCount = 0;
 
       //put particals
       for (int i = 0; i < _pointCountX; ++i) {

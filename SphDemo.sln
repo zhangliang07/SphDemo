@@ -7,6 +7,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "SphDemo", "SphDemo\SphDemo.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphWpf", "SphWpf\SphWpf.csproj", "{1A591FF4-2F44-4C4E-A449-6970E4143E0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SphWpf2", "SphWpf2\SphWpf2.csproj", "{157D2538-490F-4F3F-BDFF-5AD2F42610D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{1A591FF4-2F44-4C4E-A449-6970E4143E0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A591FF4-2F44-4C4E-A449-6970E4143E0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A591FF4-2F44-4C4E-A449-6970E4143E0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{157D2538-490F-4F3F-BDFF-5AD2F42610D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{157D2538-490F-4F3F-BDFF-5AD2F42610D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{157D2538-490F-4F3F-BDFF-5AD2F42610D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{157D2538-490F-4F3F-BDFF-5AD2F42610D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
