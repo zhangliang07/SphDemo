@@ -42,6 +42,9 @@ namespace SphWpf {
     string bufferText;
 
 
+    static Random rand = new Random();
+
+
     public MainWindow() {
       InitializeComponent();
       backgroundWorker = new BackgroundWorker();
@@ -60,23 +63,39 @@ namespace SphWpf {
     }
 
 
+    static double NormalDistribution() {
+      double u1, u2, v1 = 0, v2 = 0, s = 0;
+      while (s > 1 || s == 0) {
+        u1 = rand.NextDouble();
+        u2 = rand.NextDouble();
+        v1 = 2 * u1 - 1;
+        v2 = 2 * u2 - 1;
+        s = v1 * v1 + v2 * v2;
+      }
+      return Math.Sqrt(-2 * Math.Log(s) / s) * v1;
+    }
+
+
     void initParticals() {
       //put
+      const double span = 16;
+      Particle.count = 0;
       particleList.Clear();
-      double y = Particle.H;
-      while (y < Particle.VIEW_HEIGHT - Particle.H * 2) {
-        double x = Particle.H;
+      double y = span;
+      while (y < Particle.VIEW_HEIGHT - span * 2) {
+        double x = span;
         while (x <= Particle.VIEW_WIDTH) {
           if (2 * Math.Abs(x - 400) * Math.Abs(x - 400) - 2 * Math.Abs(x - 400) * (y - 200) + (y - 200) * (y - 200) <= 30000) {
-            particleList.Add(new Particle(x, y));
+            particleList.Add(new Particle(x + NormalDistribution(), y));
+            //particleList.Add(new Particle(x, y));
           }
-          x += Particle.H;
+          x += span;
         }
-        y += Particle.H;
+        y += span;
       }  
 
             
-      step = 1;
+      step = 0;
 
       map.Children.Clear();
       //map.Background = Brushes.LightYellow;
@@ -135,7 +154,7 @@ namespace SphWpf {
           it.computeForces(particleList);
         }
         foreach (var it in particleList) {
-          it.integrate(particleList);
+          it.integrate();
         }
 
         int time = Environment.TickCount - lastDrawTime;

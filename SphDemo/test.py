@@ -1,3 +1,4 @@
+from turtle import title
 import numpy as np  
 import matplotlib.pyplot as plt  
   
@@ -28,15 +29,7 @@ class Particles:
         self.f = np.zeros_like(x)  
         self.rho = np.zeros(len(x))  
         self.p = np.zeros(len(x))  
-  
-    def draw_particles(self):  
-        particles = self  
-        for i, (x, y) in enumerate(particles.x):  
-            circ = plt.Circle((x, y), H / 2, color='r', alpha=0.3)  
-            ax.add_artist(circ)  
-            ax.set_aspect("equal")  
-            ax.set_xlim([0, 1200])  
-            ax.set_ylim([0, 800])  
+
   
     @classmethod  
     def initSPH(cls):  
@@ -46,7 +39,8 @@ class Particles:
             x = EPS  
             while x <= VIEW_WIDTH:  
                 if 2 * np.abs(x - 400) ** 2 - 2 * np.abs(x - 400) * (y - 200) + (y - 200) ** 2 <= 30000:  
-                    jitter = np.random.randn()  
+                    #jitter = np.random.randn()
+                    jitter = 0
                     positions.append([x + jitter, y])  
                 x += H  
             y += H  
@@ -100,19 +94,42 @@ class Particles:
                 particles.v[i, 1] *= BOUND_DAMPING  
                 particles.v[i, 1] += EPS  
                 particles.x[i, 1] = VIEW_HEIGHT - EPS  
-  
-    def update(self):  
-        self.computeDensityPressure()  
-        self.computeForces()  
-        self.integrate()  
-  
-  
-particles = Particles.initSPH()  
-for i in range(400):  
-    fig, ax = plt.subplots(1, 1, figsize=(9, 6))  
-    fig.set_tight_layout(True)  
-    particles.update()  
-    particles.draw_particles()  
-    plt.savefig(f'c_damped_{i}.png')
-    plt.show()  
-    plt.close()
+
+ 
+
+
+xx = []
+yy = []
+particles = Particles.initSPH()
+for i, (x, y) in enumerate(particles.x):  
+  xx.append(x)
+  yy.append(y)
+
+plt.ion()
+fig, ax = plt.subplots(1, 1, figsize=(9, 6))  
+fig.set_tight_layout(True)
+
+for i in range(230):  
+    ax.clear()
+    plt.title("step: " + str(i))
+    ax.set_aspect("equal")
+    ax.set_xlim([0, 1200])
+    ax.set_ylim([0, 800])
+
+    particles.computeDensityPressure()
+    particles.computeForces()
+    particles.integrate() 
+    
+    for i, (x, y) in enumerate(particles.x):  
+      xx[i] = x
+      yy[i] = y
+
+    ax.scatter(xx, yy)
+    #fig.canvas.draw()
+    fig.canvas.flush_events()
+    #plt.savefig(f'c_damped_{i}.png')
+    #print("saved the picture ", i);
+
+input("Please press the Enter key to proceed")
+#plt.ioff()
+#plt.show()
