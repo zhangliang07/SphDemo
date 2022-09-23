@@ -35,21 +35,7 @@ namespace SphWpf {
     public bool isFixed = false;    //the fixed particles are not changed in any property
 
 
-    public Particle(double x, double y, double temperature, bool isFixed) {
-      ++totalCount;
-      id = totalCount;
-      posX = x;
-      posY = y;
-
-      this.temperature = temperature;
-      this.mass = _initmass;
-      //this.pressure = (60 * 0.01 - y) * density * 9.8;
-
-      //if (isFixed) {
-      //  mass *= 1e6;
-      //  density *= 1e6;
-      //}
-    }
+    public Particle(double x, double y, double temperature, bool isFixed);
 
 
     public double computeDensityAbsolute(in List<List<Particle>> neigborList) {
