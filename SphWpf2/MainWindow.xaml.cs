@@ -78,23 +78,29 @@ namespace SphWpf {
 
     void initParticals() {
       //put
-      const double span = 16;
+      const double span = 14;
       Particle.count = 0;
       particleList.Clear();
-      double y = span;
-      while (y < Particle.VIEW_HEIGHT - span * 2) {
-        double x = span;
-        while (x <= Particle.VIEW_WIDTH) {
-          if (2 * Math.Abs(x - 400) * Math.Abs(x - 400) - 2 * Math.Abs(x - 400) * (y - 200) + (y - 200) * (y - 200) <= 30000) {
-            particleList.Add(new Particle(x + NormalDistribution(), y));
-            //particleList.Add(new Particle(x, y));
-          }
-          x += span;
+      //double y = span;
+      //while (y < Particle.VIEW_HEIGHT - span * 2) {
+      //  double x = span;
+      //  while (x <= Particle.VIEW_WIDTH) {
+      //    if (2 * Math.Abs(x - 400) * Math.Abs(x - 400) - 2 * Math.Abs(x - 400) * (y - 200) + (y - 200) * (y - 200) <= 30000) {
+      //      particleList.Add(new Particle(x + NormalDistribution(), y));
+      //      //particleList.Add(new Particle(x, y));
+      //    }
+      //    x += span;
+      //  }
+      //  y += span;
+      //}  
+      for (int i = 0; i < 30; ++i) {
+        for (int j = 0; j < 30; ++j) {
+          //particleList.Add(new Particle((i + 1) * span + rand.NextDouble(), (j + 1) * span));
+          particleList.Add(new Particle((i + 1) * span, (j + 1) * span));
         }
-        y += span;
-      }  
+      }
 
-            
+
       step = 0;
 
       map.Children.Clear();
