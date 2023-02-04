@@ -25,6 +25,7 @@ namespace SphWpf {
     BackgroundWorker backgroundWorker;
     int step = 0;
     bool pause = false;
+    bool oneStep = false;
 
     struct PointDD {
       public double X;
@@ -81,22 +82,11 @@ namespace SphWpf {
       const double span = 14;
       Particle.count = 0;
       particleList.Clear();
-      //double y = span;
-      //while (y < Particle.VIEW_HEIGHT - span * 2) {
-      //  double x = span;
-      //  while (x <= Particle.VIEW_WIDTH) {
-      //    if (2 * Math.Abs(x - 400) * Math.Abs(x - 400) - 2 * Math.Abs(x - 400) * (y - 200) + (y - 200) * (y - 200) <= 30000) {
-      //      particleList.Add(new Particle(x + NormalDistribution(), y));
-      //      //particleList.Add(new Particle(x, y));
-      //    }
-      //    x += span;
-      //  }
-      //  y += span;
-      //}  
-      for (int i = 0; i < 30; ++i) {
-        for (int j = 0; j < 30; ++j) {
+
+      for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 10; ++j) {
           //particleList.Add(new Particle((i + 1) * span + rand.NextDouble(), (j + 1) * span));
-          particleList.Add(new Particle((i + 1) * span, (j + 1) * span));
+          particleList.Add(new Particle((i + 3) * span, (j + 3) * span));
         }
       }
 
@@ -180,8 +170,9 @@ namespace SphWpf {
           backgroundWorker.ReportProgress(step, null);
         }
 
-        if (backgroundWorker.CancellationPending) {
+        if (backgroundWorker.CancellationPending || oneStep) {
           e.Cancel = true;
+          oneStep= false;
           break;
         }
       }
@@ -295,5 +286,11 @@ namespace SphWpf {
 
 
     private void button2_Click(object sender, RoutedEventArgs e) { }
+
+
+    private void button3_Click(object sender, RoutedEventArgs e) {
+      oneStep = true;
+      backgroundWorker.RunWorkerAsync();
+    }
   }
 }

@@ -17,7 +17,7 @@ namespace SphWpf2 {
     const double H = 16;
     const double HSQ = H * H;
     const double MASS = 65;
-    const double VISC = 1000;
+    const double VISC = 0;    //1000
     const double DT = 0.0008;
 
     readonly static double POLY6 = 315d / (65d * Math.PI * Math.Pow(H, 9));
