@@ -79,14 +79,14 @@ namespace SphWpf {
 
     void initParticals() {
       //put
-      const double span = 14;
+      const double span = 0.019;
       Particle.count = 0;
       particleList.Clear();
 
       for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
           //particleList.Add(new Particle((i + 1) * span + rand.NextDouble(), (j + 1) * span));
-          particleList.Add(new Particle((i + 3) * span, (j + 3) * span));
+          particleList.Add(new Particle((i + 1) * span, (j + 1) * span));
         }
       }
 

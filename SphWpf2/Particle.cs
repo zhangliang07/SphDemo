@@ -11,22 +11,22 @@ using System.Windows.Media.Converters;
 
 namespace SphWpf2 {
   class Particle {
-    const double G = 12000d * -9.8;
+    const double G = -9.8;
     const double REST_DENS = 1000d;
-    const double GAS_CONST = 2000;
-    const double H = 16;
+    const double GAS_CONST = 20;
+    const double H = 0.02;
     const double HSQ = H * H;
-    const double MASS = 65;
+    const double MASS = 0.001;
     const double VISC = 0;    //1000
-    const double DT = 0.0008;
+    const double DT = 0.001;
 
     readonly static double POLY6 = 315d / (65d * Math.PI * Math.Pow(H, 9));
     readonly static double SPIKY_GRAD = -45d / (Math.PI * Math.Pow(H, 6));
     readonly static double VISC_LAP = 45d / (Math.PI * Math.Pow(H, 6));
 
     const double BOUND_DAMPING = -0.5;
-    public const double VIEW_HEIGHT = 800;
-    public const double VIEW_WIDTH = 1200;
+    public const double VIEW_HEIGHT = 0.5;
+    public const double VIEW_WIDTH = 0.5;
 
     public static int count = 0;
 
@@ -76,7 +76,8 @@ namespace SphWpf2 {
         if (r2 < HSQ) {
           double r = Math.Sqrt(r2);
 
-          double temp = 1d / r * MASS * (_pressure + it._pressure) / (2d * it._rho) * SPIKY_GRAD * Math.Pow(H - r, 2);
+          double temp = 1d / r * MASS * (_pressure + it._pressure)
+            / (2d * it._rho) * SPIKY_GRAD * Math.Pow(H - r, 2);
           fPressX += -diffX * temp;
           fPressY += -diffY * temp;
 
@@ -98,20 +99,18 @@ namespace SphWpf2 {
       _posX += DT * _vX;
       _posY += DT * _vY;
 
-      if (_posX - H < 0.0) {
+      if (_posX < 0.0) {
         _vX *= BOUND_DAMPING;
-        _posX = H;
-      } else if (_posX + H > VIEW_WIDTH) {
+        _posX = 0;
+      } else if (_posX > VIEW_WIDTH) {
         _vX *= BOUND_DAMPING;
-        _posX = VIEW_WIDTH - H;
-      } else if (_posY - H < 0.0) {
+        _posX = VIEW_WIDTH;
+      } else if (_posY < 0.0) {
         _vY *= BOUND_DAMPING;
-        _vY += H;
-        _posY = H;
-      } else if (_posY + H > VIEW_HEIGHT) {
+        _posY = 0;
+      } else if (_posY > VIEW_HEIGHT) {
         _vY *= BOUND_DAMPING;
-        _vY += H;
-        _posY = VIEW_HEIGHT - H;
+        _posY = VIEW_HEIGHT;
       }
     }
   }
